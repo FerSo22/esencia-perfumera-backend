@@ -1,0 +1,16 @@
+const crypto = require('crypto');
+
+function generateApiKey(length) {
+    const bytes = crypto.randomBytes(length);
+    const apiKey = bytes.toString('base64')
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=/g, '')
+        .substring(0, length);
+    return apiKey;
+}
+
+// Generar una API key de 32 caracteres
+const apiKey = generateApiKey(32);
+const key = `es-key-${apiKey}`
+console.log(key);
