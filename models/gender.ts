@@ -1,6 +1,6 @@
 import { DataTypes, Model } from "sequelize";
 import db from "../db/connection";
-import Perfume from "./perfume";
+// import Perfume from "./perfume";
 
 class Gender extends Model { }
 
@@ -21,10 +21,11 @@ Gender.init(
             allowNull: false
         }
     },
-    { 
+    {
         sequelize: db,
         modelName: "Gender",
-        tableName: "genders",
+        tableName: "gender",
+        schema: "esencia_perfumera",
         timestamps: false,
         underscored: true
     }

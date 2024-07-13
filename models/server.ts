@@ -38,8 +38,9 @@ class Server {
             await db.authenticate();
             console.log("Conexión establecida con la base de datos");
 
-            await db.sync();
-            console.log("Bases de datos creadas");
+            // SOLO PARA UTILIZAR EN DESARROLLO, EN PRODUCCIÓN SE UTILIZA LAS MIGRATIONS
+            // await db.sync({ schema: "esencia_perfumera" });
+            // console.log("Bases de datos creadas");
         } catch (error) {
             throw new Error(`Ocurrió un error al conectar con la base de datos: ${error}`);
         }
@@ -55,25 +56,58 @@ class Server {
         const allowedOrigins = (process.env.ALLOWED_ORIGINS || "").split(",");
         // console.log(allowedOrigins);
         // CORS
+        // this.app.use(cors({
+        //     origin: (origin, callback) => {
+        //         // COMENTAR PARA NO PERMITIR SOLICITUDES SIN ENCABEZADO DE ORIGEN (postman, bruno, etc)
+        //         // if(!origin) return callback(null, true);
+
+        //         // ACTIVAR LUEGO DE SUBIR, PARA EVITAR SOLICITUDES DESDE ENCABEZADOS SIN ORIGEN
+        //         // EN DESARROLLO DESACTIVAR PARA TESTEAR CON POSTMAN
+        //         if (!origin) {
+        //             callback(new Error("Acceso no permitido: Falta el encabezado de origen"));
+        //         }
+
+        //         if(origin && allowedOrigins.indexOf(origin) !== -1) {
+        //             callback(null, true);
+        //         } else {
+        //             callback(new Error(`Acceso no permitido: Origen desconocido: ${origin}`));
+        //         }
+        //     },
+        //     methods: ['OPTIONS', 'GET', 'POST', 'PUT', 'DELETE'],
+        //     allowedHeaders: ['Content-Type', 'Authorization']
+        // }));
         this.app.use(cors({
-            origin: (origin, callback) => {
-                if(!origin) return callback(null, true);
-
-                // ACTIVAR LUEGO DE SUBIR, PARA EVITAR SOLICITUDES DESDE ENCABEZADOS SIN ORIGEN
-                // EN DESARROLLO DESACTIVAR PARA TESTEAR CON POSTMAN
-                // if (!origin) {
-                //     callback(new Error("Acceso no permitido: Falta el encabezado de origen"));
-                // }
-
-                if(origin && allowedOrigins.indexOf(origin) !== -1) {
-                    callback(null, true);
-                } else {
-                    callback(new Error(`Acceso no permitido: Origen desconocido: ${origin}`));
-                }
-            },
-            methods: ['OPTIONS', 'GET', 'POST', 'PUT', 'DELETE'],
+            origin: true,
+            methods: ['OPTIONS', 'GET', 'POST', 'PUT'],
             allowedHeaders: ['Content-Type', 'Authorization']
         }));
+
+        // Validar origenes
+        this.app.use((req, res, next) => {
+            const origin = req.get("origin");
+            console.log(origin);
+
+            if(!origin) return next();
+
+            // AGREGAR PARA REALIZAR PRUEBAS EN BRUNO
+            // if(!origin) return next();
+
+            if(!origin) {
+                console.error("Acceso no permitido: Falta el encabezado del origen");
+                return res.status(403).json({
+                    error: "Acceso no permitido: Falta el encabezado del origen"
+                });
+            }
+
+            if(!allowedOrigins.includes(origin)) {
+                console.error(`Acceso no permitido: Origen Desconocido ${ origin }`);
+                return res.status(403).json({
+                    error: `Acceso no permitido: Origen Desconocido ${ origin }`
+                });
+            }
+
+            next();
+        })
 
         // Lectura del body
         this.app.use(express.json());

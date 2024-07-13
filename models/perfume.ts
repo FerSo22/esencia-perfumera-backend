@@ -52,7 +52,8 @@ Perfume.init(
     {
         sequelize: db,
         modelName: "Perfume",
-        tableName: "perfumes",
+        tableName: "perfume",
+        schema: "esencia_perfumera",
         timestamps: true,
         underscored: true
     }
@@ -86,7 +87,8 @@ PerfumeImage.init(
     {
         sequelize: db,
         modelName: "PerfumeImage",
-        tableName: "images",
+        tableName: "perfume_image",
+        schema: "esencia_perfumera",
         timestamps: false,
         underscored: true,
     }

@@ -14,12 +14,16 @@ import validateFields from '../middlewares/validate-fields';
 import { PerfumeSchema, PerfumeStatusSchema } from '../validations/perfume';
 import { parseFormData } from '../middlewares/parse-formdata';
 import { PerfumeToParse } from '../helpers/types-to-parse';
+import { validateApiKey } from '../middlewares/validate-api-key';
+import { checkRole } from '../middlewares/check-role';
 
 const router = Router();
 
 router.get(
     "/",
     [
+        validateApiKey,
+        checkRole([ "ADMIN", "GUEST" ]),
         validateGender,
         validateStatus,
     ],
@@ -28,12 +32,18 @@ router.get(
 
 router.get(
     "/:id",
+    [
+        validateApiKey,
+        checkRole([ "ADMIN", "GUEST" ]),
+    ],
     getPerfume
 );
 
 router.post(
     "/",
     [
+        validateApiKey,
+        checkRole([ "ADMIN" ]),
         handleFilesUpload("array", "images"),
         parseFormData(PerfumeToParse),
         validateFields(PerfumeSchema)
@@ -44,6 +54,8 @@ router.post(
 router.put(
     "/:id",
     [
+        validateApiKey,
+        checkRole([ "ADMIN" ]),
         handleFilesUpload("array", "images"),
         parseFormData(PerfumeToParse),
         validateFields(PerfumeSchema)
@@ -54,6 +66,8 @@ router.put(
 router.put(
     "/status/:id",
     [
+        validateApiKey,
+        checkRole([ "ADMIN" ]),
         validateFields(PerfumeStatusSchema)
     ],
     updatePerfumeStatus
